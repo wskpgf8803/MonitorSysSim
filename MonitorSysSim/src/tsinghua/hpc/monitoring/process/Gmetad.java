@@ -6,16 +6,24 @@ import desmoj.core.simulator.SimProcess;
 
 public class Gmetad extends SimProcess {
 	
-	public Gmetad(Model model, String arg1, boolean arg2) {
-		super(model, arg1, arg2);
-		// TODO Auto-generated constructor stub
-	}
-
 	private MonitorSysSim model;
 
 	private int seq;  
 	
 	private int layer;
+	
+	private int totalQuc[];
+	
+	private int lossQuc[];
+	
+	public Gmetad(Model model, String arg1, boolean arg2, int seq, int layer) {
+		super(model, arg1, arg2);
+		// TODO Auto-generated constructor stub
+		this.seq = seq;
+		this.layer = layer;
+		totalQuc = new int[4];
+		lossQuc = new int[4];
+	}
 	
 	public void lifeCycle() {
 

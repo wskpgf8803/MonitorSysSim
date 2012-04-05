@@ -1,5 +1,6 @@
 package tsinghua.hpc.monitoring.mode;
 
+
 import java.util.concurrent.TimeUnit;
 
 import tsinghua.hpc.monitoring.process.Gmetad;
@@ -10,7 +11,9 @@ import desmoj.core.dist.DiscreteDistPoisson;
 import desmoj.core.simulator.Experiment;
 import desmoj.core.simulator.InterruptCode;
 import desmoj.core.simulator.Model;
+import desmoj.core.simulator.ProcessQueue;
 import desmoj.core.simulator.TimeInstant;
+import desmoj.core.simulator.TimeSpan;
 
 public class MonitorSysSim extends Model{
 
@@ -26,12 +29,33 @@ public class MonitorSysSim extends Model{
 
 	public static boolean SHOW_BAR = true;
 	
-	public static double QUALITY_FUC_PARA = -0.00020;
+	public static int clusterNum = 10;
+	
+	public static int clusterSize = 100;
+	
+	public static int layerSize = 2;
+	
+	public static double volumeUpBound = 4000;
+	
+	public static double QUALITY_FUC_PARA = -0.00100;
+	
+
+	public static double taskSeriveTimeStreamLowBound = 10;
+	
+	public static double taskSeriveTimeStreamUpBound = 20;
 	
 	
 	public static int CIRCLES_NUM_PER_SECEND = 1000;
 	
 	public static int SIM_SECENDS = 360;
+	
+	/** Quality Function HeYu */
+	public static double qualityFuc(double volume) {
+		
+		if(volume >= volumeUpBound)
+			return 1;
+		return (1-Math.exp(QUALITY_FUC_PARA*volume))/(1-Math.exp(volumeUpBound*QUALITY_FUC_PARA));
+	}
 	
 	public MonitorSysSim(Model owner, String name, boolean showInReport,
 			boolean showIntrace) {
@@ -48,12 +72,29 @@ public class MonitorSysSim extends Model{
 	@Override
 	public void doInitialSchedules() {
 		// TODO Auto-generated method stub
-		
+		int nodeNum = 1;
+		int seq = 1;
+		for(int layerSeq = 1; layerSeq <= layerSize; layerSeq++){
+			for(int j = 0; j < nodeNum; j++){
+				seq ++;
+				Gmond gmond = new Gmond(this, "gmond#" + seq, true, seq, layerSeq);
+				gmond.activate(new TimeSpan(0.0));
+				Gmetad gmetad = new Gmetad(this, "gmetad#" + seq, true, seq, layerSeq);
+				gmond.activate(new TimeSpan(0.0));
+			}
+			nodeNum *= 2;	
+		}		
 	}
 
 	@Override
 	public void init() {
 		// TODO Auto-generated method stub
+
+		taskSeriveTimeStream = new ContDistUniform(this,
+				"task Service Time Stream", taskSeriveTimeStreamLowBound, taskSeriveTimeStreamUpBound, true, false);
+		
+		gmetadList = new ProcessQueue<Gmetad>(this, "Gmetad Queue", true, true);
+		gmondList = new ProcessQueue<Gmond>(this, "Gmond Queue", true, true);
 		
 	}
 	
