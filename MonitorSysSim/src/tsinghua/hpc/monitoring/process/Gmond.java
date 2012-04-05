@@ -22,9 +22,9 @@ public class Gmond extends SimProcess {
 	
 	public static double lossQuc[];
 	
-	public static double totalVolume[];
+	private double totalVolume[];
 	
-	public static double lossVolume[];
+	private double lossVolume[];
 	
 	public Gmond(Model model, String arg1, boolean arg2, int seq, int layer) {
 		super(model, arg1, arg2);

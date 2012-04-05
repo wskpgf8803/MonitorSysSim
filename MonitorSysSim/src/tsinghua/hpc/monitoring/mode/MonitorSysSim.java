@@ -33,7 +33,7 @@ public class MonitorSysSim extends Model{
 	
 	public static int clusterSize = 100;
 	
-	public static int layerSize = 2;
+	public static int layerSize = 5;
 	
 	public static double volumeUpBound[] = {2000,2000,160,100};
 	
@@ -92,6 +92,7 @@ public class MonitorSysSim extends Model{
 			}
 			nodeNum *= 2;	
 		}		
+		System.out.println(seq -1);
 	}
 
 	@Override
@@ -144,6 +145,24 @@ public class MonitorSysSim extends Model{
 		double totalQuc = 0;
 		for(int i = 0; i < 4; i ++){
 			totalQuc += Gmond.totalQuc[i];
+		}
+		
+		System.out.println(lossQuc);
+		
+		System.out.println(totalQuc);
+		
+		System.out.println(lossQuc/totalQuc);
+		
+		System.out.println("Game Over!!!");
+		
+		lossQuc = 0;
+		for(int i = 0; i < 4; i ++){
+			lossQuc += Gmetad.lossQuc[i];
+		}
+		
+		totalQuc = 0;
+		for(int i = 0; i < 4; i ++){
+			totalQuc += Gmetad.totalQuc[i];
 		}
 		
 		System.out.println(lossQuc);
