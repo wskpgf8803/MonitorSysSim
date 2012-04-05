@@ -21,7 +21,7 @@ public class MonitorSysSim extends Model{
 	
 	private static ContDistUniform taskVolumeUinStream;
 
-	private ContDistUniform taskSeriveTimeStream;
+	private static ContDistUniform taskSeriveTimeStream;
 
 	protected desmoj.core.simulator.ProcessQueue<Gmetad> gmetadList;
 
@@ -35,9 +35,9 @@ public class MonitorSysSim extends Model{
 	
 	public static int layerSize = 2;
 	
-	public static double volumeUpBound = 4000;
+	public static double volumeUpBound[] = {2000,2000,160,100};
 	
-	public static double QUALITY_FUC_PARA = -0.00100;
+	public static double QUALITY_FUC_PARA[] = {-0.00100,-0.00100,-0.00100,-0.00100};;
 	
 
 	public static double taskSeriveTimeStreamLowBound = 10;
@@ -45,17 +45,25 @@ public class MonitorSysSim extends Model{
 	public static double taskSeriveTimeStreamUpBound = 20;
 	
 	
-	public static int CIRCLES_NUM_PER_SECEND = 1000;
+	public static int CIRCLES_NUM_PER_SECEND = 100;
 	
-	public static int SIM_SECENDS = 360;
+	public static int SIM_SECENDS = 1;
+	
+	public enum VolumeType{
+		CPU, Memory, Disk, Network
+	}
+	
+	public static double qualityFuc(double volume, int type){
+		if(volume >= volumeUpBound[type])
+			return 1;
+		return (1-Math.exp(QUALITY_FUC_PARA[type]*volume))/(1-Math.exp(volumeUpBound[type]*QUALITY_FUC_PARA[type]));
+	}
 	
 	/** Quality Function HeYu */
-	public static double qualityFuc(double volume) {
-		
-		if(volume >= volumeUpBound)
-			return 1;
-		return (1-Math.exp(QUALITY_FUC_PARA*volume))/(1-Math.exp(volumeUpBound*QUALITY_FUC_PARA));
+	public static double getQuc(double volume, int type) {
+		return qualityFuc(volume, type);	
 	}
+	
 	
 	public MonitorSysSim(Model owner, String name, boolean showInReport,
 			boolean showIntrace) {
@@ -76,11 +84,11 @@ public class MonitorSysSim extends Model{
 		int seq = 1;
 		for(int layerSeq = 1; layerSeq <= layerSize; layerSeq++){
 			for(int j = 0; j < nodeNum; j++){
-				seq ++;
 				Gmond gmond = new Gmond(this, "gmond#" + seq, true, seq, layerSeq);
 				gmond.activate(new TimeSpan(0.0));
 				Gmetad gmetad = new Gmetad(this, "gmetad#" + seq, true, seq, layerSeq);
-				gmond.activate(new TimeSpan(0.0));
+				gmetad.activate(new TimeSpan(0.0));
+				seq ++;
 			}
 			nodeNum *= 2;	
 		}		
@@ -98,9 +106,14 @@ public class MonitorSysSim extends Model{
 		
 	}
 	
+	public static double getTaskArrivalTime() {
+
+		return taskSeriveTimeStream.sample();
+	}
+	
 	public static void main(java.lang.String[] args) {
 
-		MonitorSysSim model = new MonitorSysSim(null, "simMode1", true, false);
+		MonitorSysSim model = new MonitorSysSim(null, "MonitorSysSim", true, false);
 		Experiment exp = new Experiment("simMode1Experiment",
 				TimeUnit.SECONDS, TimeUnit.MINUTES, null);
 
@@ -112,9 +125,9 @@ public class MonitorSysSim extends Model{
 		exp.stop(new TimeInstant(CIRCLES_NUM_PER_SECEND * SIM_SECENDS, TimeUnit.MINUTES)); // set end of
 															// simulation at
 															// 500 minutes
-		exp.tracePeriod(new TimeInstant(0), new TimeInstant(50000,
+		exp.tracePeriod(new TimeInstant(0), new TimeInstant(500,
 				TimeUnit.MINUTES)); // set the period of the trace
-		exp.debugPeriod(new TimeInstant(0), new TimeInstant(400000,
+		exp.debugPeriod(new TimeInstant(0), new TimeInstant(400,
 				TimeUnit.MINUTES)); // and debug output
 
 		exp.start();
@@ -123,6 +136,22 @@ public class MonitorSysSim extends Model{
 
 		exp.finish();
 
+		double lossQuc = 0;
+		for(int i = 0; i < 4; i ++){
+			lossQuc += Gmond.lossQuc[i];
+		}
+		
+		double totalQuc = 0;
+		for(int i = 0; i < 4; i ++){
+			totalQuc += Gmond.totalQuc[i];
+		}
+		
+		System.out.println(lossQuc);
+		
+		System.out.println(totalQuc);
+		
+		System.out.println(lossQuc/totalQuc);
+		
 		System.out.println("Game Over!!!");
 	}
 
