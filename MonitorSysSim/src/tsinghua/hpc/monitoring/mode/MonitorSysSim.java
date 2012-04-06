@@ -1,6 +1,5 @@
 package tsinghua.hpc.monitoring.mode;
 
-
 import java.util.concurrent.TimeUnit;
 
 import tsinghua.hpc.monitoring.process.Gmetad;
