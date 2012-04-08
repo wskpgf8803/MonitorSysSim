@@ -7,11 +7,21 @@ import desmoj.core.simulator.TimeSpan;
 
 public class Gmetad extends SimProcess {
 	
+	private final int CPU = 0;
+	
+	private final int MEMORY = 1;
+	
+	private final int DISK = 2;
+	
+	private final int NETWORK = 3;
+	
 	private MonitorSysSim model;
 
 	private int seq;  
 	
 	private int layer;
+	
+	private int childNum;
 	
 	public static double totalQuc[];
 	
@@ -21,11 +31,12 @@ public class Gmetad extends SimProcess {
 	
 	private double lossVolume[];
 	
-	public Gmetad(Model model, String arg1, boolean arg2, int seq, int layer) {
+	public Gmetad(Model model, String arg1, boolean arg2, int seq, int layer, int childNum) {
 		super(model, arg1, arg2);
 		// TODO Auto-generated constructor stub
 		this.seq = seq;
 		this.layer = layer;
+		this.childNum = childNum;
 		/*
 		 * 0  CPU(M Hz)
 		 * 1  Memory(M)
@@ -36,38 +47,48 @@ public class Gmetad extends SimProcess {
 		lossQuc = new double[4];
 		totalVolume =  new double[4];
 		{
-			totalVolume[0] = 2000;
-			totalVolume[1] = 2000;
-			totalVolume[2] = 160;
-			totalVolume[3] = 100;
+			totalVolume[CPU] = 2000;
+			totalVolume[MEMORY] = 2000;
+			totalVolume[DISK] = 160;
+			totalVolume[NETWORK] = 100;
 		}
 		lossVolume = new double[4];
 		{
 			int nodeNum = nodeNum(MonitorSysSim.layerSize - layer);
-			lossVolume[0] = 50;
-			lossVolume[1] = 50 * nodeNum;
-			lossVolume[2] = 0.1 * nodeNum;
-			lossVolume[3] = 1 * (MonitorSysSim.layerSize - layer + 1);
+			lossVolume[CPU] = 50;
+			lossVolume[MEMORY] = 50 * nodeNum;
+			lossVolume[DISK] = 0.1 * nodeNum;
+			lossVolume[NETWORK] = childNum;
 		}
 	}
 	
 	public int nodeNum(int layer){
 		int num = 0;
 		for(int i = 0; i <= layer; i++){
-			num += Math.pow(2, i);
+			num += Math.pow(childNum, i);
 		}
 		return num;
 	}
 	
 	public void lifeCycle() {
 
+		int loop = 1;
 		while(true){
-			for(int i = 0; i < 4 ; i++){
-				totalQuc[i] += MonitorSysSim.getQuc(totalVolume[i], i);
-				lossQuc[i] += MonitorSysSim.getQuc(lossVolume[i], i);				
-			}
 			double time = MonitorSysSim.getTaskArrivalTime();
 			hold(new TimeSpan(time));
+			for(int i = 0; i < 4 ; i++){
+				totalQuc[i] += MonitorSysSim.getQuc(totalVolume[i], i);
+				switch(i){
+				case DISK:
+					lossQuc[i] += MonitorSysSim.getQuc(lossVolume[i] * loop, i);	
+					loop ++;
+					break;
+				case NETWORK:
+					lossQuc[i] += MonitorSysSim.getQuc(lossVolume[i] / time , i);
+				default:
+					lossQuc[i] += MonitorSysSim.getQuc(lossVolume[i], i);	
+				}
+			}
 		}
 		
 	}

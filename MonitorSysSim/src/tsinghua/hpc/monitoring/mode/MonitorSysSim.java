@@ -28,9 +28,13 @@ public class MonitorSysSim extends Model{
 
 	public static boolean SHOW_BAR = true;
 	
+	public static int metricNum = 30;
+	
 	public static int clusterNum = 10;
 	
 	public static int clusterSize = 100;
+	
+	public static int gmetadChild = 3;
 	
 	public static int layerSize = 5;
 	
@@ -83,9 +87,9 @@ public class MonitorSysSim extends Model{
 		int seq = 1;
 		for(int layerSeq = 1; layerSeq <= layerSize; layerSeq++){
 			for(int j = 0; j < nodeNum; j++){
-				Gmond gmond = new Gmond(this, "gmond#" + seq, true, seq, layerSeq);
+				Gmond gmond = new Gmond(this, "gmond#" + seq, true, seq, layerSeq, clusterSize);
 				gmond.activate(new TimeSpan(0.0));
-				Gmetad gmetad = new Gmetad(this, "gmetad#" + seq, true, seq, layerSeq);
+				Gmetad gmetad = new Gmetad(this, "gmetad#" + seq, true, seq, layerSeq, gmetadChild);
 				gmetad.activate(new TimeSpan(0.0));
 				seq ++;
 			}

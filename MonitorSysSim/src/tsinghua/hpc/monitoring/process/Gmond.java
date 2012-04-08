@@ -12,11 +12,21 @@ import desmoj.core.simulator.TimeSpan;
 
 public class Gmond extends SimProcess {
 	
+	private final int CPU = 0;
+	
+	private final int MEMORY = 1;
+	
+	private final int DISK = 2;
+	
+	private final int NETWORK = 3;
+	
 	private MonitorSysSim model;
 
 	private int seq;  
 	
 	private int layer;
+	
+	private int clusterSize;
 	
 	public static double totalQuc[];
 	
@@ -26,11 +36,13 @@ public class Gmond extends SimProcess {
 	
 	private double lossVolume[];
 	
-	public Gmond(Model model, String arg1, boolean arg2, int seq, int layer) {
+	public Gmond(Model model, String arg1, boolean arg2, int seq, int layer, int clusterSize) {
 		super(model, arg1, arg2);
 		// TODO Auto-generated constructor stub
 		this.seq = seq;
 		this.layer = layer;
+		this.clusterSize = clusterSize;
+		
 		/*
 		 * 0  CPU(M Hz)
 		 * 1  Memory(M)
@@ -41,29 +53,34 @@ public class Gmond extends SimProcess {
 		lossQuc = new double[4];
 		totalVolume =  new double[4];
 		{
-			totalVolume[0] = 2000;
-			totalVolume[1] = 2000;
-			totalVolume[2] = 160;
-			totalVolume[3] = 100;
+			totalVolume[CPU] = 2000;
+			totalVolume[MEMORY] = 2000;
+			totalVolume[DISK] = 160;
+			totalVolume[NETWORK] = 100;
 		}
 		lossVolume = new double[4];
 		{
-			lossVolume[0] = 50;
-			lossVolume[1] = 50;
-			lossVolume[2] = 0.1;
-			lossVolume[3] = 1;
+			lossVolume[CPU] = 50;
+			lossVolume[MEMORY] = clusterSize * 1 ;
+			lossVolume[DISK] = 0;
+			lossVolume[NETWORK] = clusterSize * 0.16;
 		}
 	}
 	
 	public void lifeCycle() {
 
 		while(true){
-			for(int i = 0; i < 4 ; i++){
-				totalQuc[i] += MonitorSysSim.getQuc(totalVolume[i], i);
-				lossQuc[i] += MonitorSysSim.getQuc(lossVolume[i], i);				
-			}
 			double time = MonitorSysSim.getTaskArrivalTime();
 			hold(new TimeSpan(time));
+			for(int i = 0; i < 4 ; i++){
+				totalQuc[i] += MonitorSysSim.getQuc(totalVolume[i], i);
+				switch(i){
+				case NETWORK:
+					lossQuc[i] += MonitorSysSim.getQuc(lossVolume[i] / time , i);	
+				default:
+					lossQuc[i] += MonitorSysSim.getQuc(lossVolume[i], i);	
+				}	
+			}
 		}
 		
 	}
