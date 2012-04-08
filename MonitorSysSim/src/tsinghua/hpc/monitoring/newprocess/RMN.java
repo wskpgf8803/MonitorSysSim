@@ -1,11 +1,11 @@
-package tsinghua.hpc.monitoring.process;
+package tsinghua.hpc.monitoring.newprocess;
 
 import tsinghua.hpc.monitoring.mode.MonitorSysSim;
 import desmoj.core.simulator.Model;
 import desmoj.core.simulator.SimProcess;
 import desmoj.core.simulator.TimeSpan;
 
-public class Gmetad extends SimProcess {
+public class RMN extends SimProcess {
 	
 	private final int CPU = 0;
 	
@@ -31,7 +31,7 @@ public class Gmetad extends SimProcess {
 	
 	private double lossVolume[];
 	
-	public Gmetad(Model model, String arg1, boolean arg2, int seq, int layer, int childNum) {
+	public RMN(Model model, String arg1, boolean arg2, int seq, int layer, int childNum) {
 		super(model, arg1, arg2);
 		// TODO Auto-generated constructor stub
 		this.seq = seq;
@@ -55,10 +55,10 @@ public class Gmetad extends SimProcess {
 		lossVolume = new double[4];
 		{
 			int nodeNum = nodeNum(MonitorSysSim.layerSize - layer);
-			lossVolume[CPU] = 50;
-			lossVolume[MEMORY] = 50 * nodeNum;
-			lossVolume[DISK] = 0.1 * nodeNum;
-			lossVolume[NETWORK] = childNum * nodeNum;
+			lossVolume[CPU] = 50 * childNum;
+			lossVolume[MEMORY] = 50 * childNum;
+			lossVolume[DISK] = 0.1 * childNum;
+			lossVolume[NETWORK] = childNum;
 		}
 	}
 	
