@@ -25,6 +25,10 @@ public class MonitorSysSim extends Model{
 	protected desmoj.core.simulator.ProcessQueue<Gmetad> gmetadList;
 
 	protected desmoj.core.simulator.ProcessQueue<Gmond> gmondList;
+	
+	public static int loop = 1;
+	
+	public static int seq = 1;
 
 	public static boolean SHOW_BAR = true;
 	
@@ -40,7 +44,7 @@ public class MonitorSysSim extends Model{
 	
 	public static double volumeUpBound[] = {2000,2000,160,100};
 	
-	public static double QUALITY_FUC_PARA[] = {-0.00100,-0.00100,-0.00100,-0.00100};;
+	public static double QUALITY_FUC_PARA[] = {-0.00100,-0.00100,-0.00100,-0.00100};
 	
 
 	public static double taskSeriveTimeStreamLowBound = 10;
@@ -48,7 +52,7 @@ public class MonitorSysSim extends Model{
 	public static double taskSeriveTimeStreamUpBound = 20;
 	
 	
-	public static int CIRCLES_NUM_PER_SECEND = 100;
+	public static int CIRCLES_NUM_PER_SECEND = 3600;
 	
 	public static int SIM_SECENDS = 1;
 	
@@ -84,7 +88,6 @@ public class MonitorSysSim extends Model{
 	public void doInitialSchedules() {
 		// TODO Auto-generated method stub
 		int nodeNum = 1;
-		int seq = 1;
 		for(int layerSeq = 1; layerSeq <= layerSize; layerSeq++){
 			for(int j = 0; j < nodeNum; j++){
 				Gmond gmond = new Gmond(this, "gmond#" + seq, true, seq, layerSeq, clusterSize);
@@ -93,7 +96,7 @@ public class MonitorSysSim extends Model{
 				gmetad.activate(new TimeSpan(0.0));
 				seq ++;
 			}
-			nodeNum *= 2;	
+			nodeNum *= gmetadChild;	
 		}		
 		System.out.println(seq -1);
 	}
@@ -118,15 +121,15 @@ public class MonitorSysSim extends Model{
 	public static void main(java.lang.String[] args) {
 
 		MonitorSysSim model = new MonitorSysSim(null, "MonitorSysSim", true, false);
-		Experiment exp = new Experiment("simMode1Experiment",
-				TimeUnit.SECONDS, TimeUnit.MINUTES, null);
+		Experiment exp = new Experiment("MonitorSysSimExperiment",
+				TimeUnit.SECONDS, TimeUnit.SECONDS, null);
 
 		// connect both
 		model.connectToExperiment(exp);
 
 		// set experiment parameters
 		exp.setShowProgressBar(SHOW_BAR); // display a progress bar (or not)
-		exp.stop(new TimeInstant(CIRCLES_NUM_PER_SECEND * SIM_SECENDS, TimeUnit.MINUTES)); // set end of
+		exp.stop(new TimeInstant(CIRCLES_NUM_PER_SECEND * SIM_SECENDS, TimeUnit.SECONDS)); // set end of
 															// simulation at
 															// 500 minutes
 		exp.tracePeriod(new TimeInstant(0), new TimeInstant(500,
@@ -175,6 +178,9 @@ public class MonitorSysSim extends Model{
 		System.out.println(lossQuc/totalQuc);
 		
 		System.out.println("Game Over!!!");
+		
+		System.out.println("loop1:" + CIRCLES_NUM_PER_SECEND * SIM_SECENDS / 15);
+		System.out.println("loop:" + loop / (seq - 1));
 	}
 
 }

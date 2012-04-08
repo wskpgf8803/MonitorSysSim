@@ -81,6 +81,7 @@ public class Gmond extends SimProcess {
 					lossQuc[i] += MonitorSysSim.getQuc(lossVolume[i], i);	
 				}	
 			}
+			MonitorSysSim.loop ++;
 		}
 		
 	}
