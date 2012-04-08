@@ -38,7 +38,7 @@ public class MonitorSysSim extends Model{
 	
 	public static int seq = 1;
 
-	public static boolean SHOW_BAR = false;
+	public static boolean SHOW_BAR = true;
 	
 	public static int metricNum = 30;
 	
@@ -104,11 +104,11 @@ public class MonitorSysSim extends Model{
 		int nodeNum = 1;
 		for(int layerSeq = 1; layerSeq <= layerSize; layerSeq++){
 			for(int j = 0; j < nodeNum; j++){
-				Gmond gmond = new Gmond(this, "gmond#" + seq, true, seq, layerSeq, clusterSize);
-				gmond.activate(new TimeSpan(0.0));
+//				Gmond gmond = new Gmond(this, "gmond#" + seq, true, seq, layerSeq, clusterSize);
+//				gmond.activate(new TimeSpan(0.0));
 				
-//				Gmetad gmetad = new Gmetad(this, "gmetad#" + seq, true, seq, layerSeq, gmetadChild);
-//				gmetad.activate(new TimeSpan(0.0));
+				Gmetad gmetad = new Gmetad(this, "gmetad#" + seq, true, seq, layerSeq, gmetadChild);
+				gmetad.activate(new TimeSpan(0.0));
 				seq ++;
 			}
 			nodeNum *= gmetadChild;	
@@ -119,14 +119,14 @@ public class MonitorSysSim extends Model{
 		for(int layerSeq = 1; layerSeq <= layerSize; layerSeq++){
 			for(int j = 0; j < nodeNum; j++){
 				
-				Node node = new Node(this, "node#" + seq, true, seq, layerSeq, clusterSize);
-				node.activate(new TimeSpan(0.0));
+//				Node node = new Node(this, "node#" + seq, true, seq, layerSeq, clusterSize);
+//				node.activate(new TimeSpan(0.0));
+//				
+//				MMN mmn = new MMN(this, "mmn#" + seq, true, seq, layerSeq, clusterSize);
+//				mmn.activate(new TimeSpan(0.0));
 				
-				MMN mmn = new MMN(this, "mmn#" + seq, true, seq, layerSeq, clusterSize);
-				mmn.activate(new TimeSpan(0.0));
-				
-//				RMN rmn = new RMN(this, "rmn#" + seq, true, seq, layerSeq, gmetadChild);
-//				rmn.activate(new TimeSpan(0.0));
+				RMN rmn = new RMN(this, "rmn#" + seq, true, seq, layerSeq, gmetadChild);
+				rmn.activate(new TimeSpan(0.0));
 				seq ++;
 			}
 			nodeNum *= gmetadChild;	
@@ -325,7 +325,7 @@ public class MonitorSysSim extends Model{
 		
 		System.out.println(lossQuc/totalQuc);
 		
-		Y_GmetadQuc.print(lossQuc/totalQuc + " ");
+		Y_RMNQuc.print(lossQuc/totalQuc + " ");
 		
 		X_CLayer.print(layerSize + " ");
 		
