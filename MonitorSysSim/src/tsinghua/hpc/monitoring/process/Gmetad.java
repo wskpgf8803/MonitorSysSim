@@ -5,6 +5,12 @@ import desmoj.core.simulator.Model;
 import desmoj.core.simulator.SimProcess;
 import desmoj.core.simulator.TimeSpan;
 
+/**
+ * Gmetad class
+ * @author Yu.He
+ * @param index
+ * @param pageSize
+ */
 public class Gmetad extends SimProcess {
 	
 	private final int CPU = 0;
@@ -31,6 +37,12 @@ public class Gmetad extends SimProcess {
 	
 	private double lossVolume[];
 	
+	/**
+	 * Gmetad generator
+	 * @param seq the sequence number of gmetad
+	 * @param layer the layer number of gmetad
+	 * @param childNum the child number of gmetad
+	 */
 	public Gmetad(Model model, String arg1, boolean arg2, int seq, int layer, int childNum) {
 		super(model, arg1, arg2);
 		// TODO Auto-generated constructor stub
