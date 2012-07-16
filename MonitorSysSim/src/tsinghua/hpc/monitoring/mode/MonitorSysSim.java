@@ -59,7 +59,7 @@ public class MonitorSysSim extends Model{
 	
 	public static double taskSeriveTimeStreamUpBound = 20;
 	
-	public static double LOOP_NUM = 10;
+	public static double LOOP_NUM = 1;
 	
 	public static int CLUSTER_SIZE_DEC_NUM = 10;
 	
@@ -101,38 +101,41 @@ public class MonitorSysSim extends Model{
 	@Override
 	public void doInitialSchedules() {
 		// TODO Auto-generated method stub
-		int nodeNum = 1;
-		for(int layerSeq = 1; layerSeq <= layerSize; layerSeq++){
-			for(int j = 0; j < nodeNum; j++){
-//				Gmond gmond = new Gmond(this, "gmond#" + seq, true, seq, layerSeq, clusterSize);
-//				gmond.activate(new TimeSpan(0.0));
-				
-				Gmetad gmetad = new Gmetad(this, "gmetad#" + seq, true, seq, layerSeq, gmetadChild);
-				gmetad.activate(new TimeSpan(0.0));
-				seq ++;
-			}
-			nodeNum *= gmetadChild;	
-		}		
-		
-		seq = 1;
-		nodeNum = 1;
-		for(int layerSeq = 1; layerSeq <= layerSize; layerSeq++){
-			for(int j = 0; j < nodeNum; j++){
-				
-//				Node node = new Node(this, "node#" + seq, true, seq, layerSeq, clusterSize);
-//				node.activate(new TimeSpan(0.0));
+//		int nodeNum = 1;
+//		for(int layerSeq = 1; layerSeq <= layerSize; layerSeq++){
+//			for(int j = 0; j < nodeNum; j++){
+////				Gmond gmond = new Gmond(this, "gmond#" + seq, true, seq, layerSeq, clusterSize);
+////				gmond.activate(new TimeSpan(0.0));
 //				
-//				MMN mmn = new MMN(this, "mmn#" + seq, true, seq, layerSeq, clusterSize);
-//				mmn.activate(new TimeSpan(0.0));
-				
-				RMN rmn = new RMN(this, "rmn#" + seq, true, seq, layerSeq, gmetadChild);
-				rmn.activate(new TimeSpan(0.0));
-				seq ++;
-			}
-			nodeNum *= gmetadChild;	
-		}	
+//				Gmetad gmetad = new Gmetad(this, "gmetad#" + seq, true, seq, layerSeq, gmetadChild);
+//				gmetad.activate(new TimeSpan(0.0));
+//				seq ++;
+//			}
+//			nodeNum *= gmetadChild;	
+//		}		
+//		
+//		seq = 1;
+//		nodeNum = 1;
+//		for(int layerSeq = 1; layerSeq <= layerSize; layerSeq++){
+//			for(int j = 0; j < nodeNum; j++){
+//				
+////				Node node = new Node(this, "node#" + seq, true, seq, layerSeq, clusterSize);
+////				node.activate(new TimeSpan(0.0));
+////				
+////				MMN mmn = new MMN(this, "mmn#" + seq, true, seq, layerSeq, clusterSize);
+////				mmn.activate(new TimeSpan(0.0));
+//				
+//				RMN rmn = new RMN(this, "rmn#" + seq, true, seq, layerSeq, gmetadChild);
+//				rmn.activate(new TimeSpan(0.0));
+//				seq ++;
+//			}
+//			nodeNum *= gmetadChild;	
+//		}	
+//		
+//		System.out.println(seq -1);
 		
-		System.out.println(seq -1);
+		RMN rmn = new RMN(this, "rmn#" + seq, true);
+		rmn.activate(new TimeSpan(0.0));
 	}
 
 	@Override
@@ -287,49 +290,49 @@ public class MonitorSysSim extends Model{
 	
 	public static void writeGmetad(PrintWriter X_CLayer, PrintWriter Y_GmetadQuc, PrintWriter Y_RMNQuc){
 		
-		System.out.println("Gmetad:");
-		
-		double lossQuc = 0;
-		for(int i = 0; i < 4; i ++){
-			lossQuc += Gmetad.lossQuc[i];
-		}
-		
-		double totalQuc = 0;
-		for(int i = 0; i < 4; i ++){
-			totalQuc += Gmetad.totalQuc[i];
-		}
-		
-		System.out.println(lossQuc);
-		
-		System.out.println(totalQuc);
-		
-		System.out.println(lossQuc/totalQuc);
-		
-		Y_GmetadQuc.print(lossQuc/totalQuc + " ");
-		
-		System.out.println("RMN:");
-		
-		lossQuc = 0;
-		for(int i = 0; i < 4; i ++){
-			lossQuc += RMN.lossQuc[i];
-		}
-		
-		totalQuc = 0;
-		for(int i = 0; i < 4; i ++){
-			totalQuc += RMN.totalQuc[i];
-		}
-		
-		System.out.println(lossQuc);
-		
-		System.out.println(totalQuc);
-		
-		System.out.println(lossQuc/totalQuc);
-		
-		Y_RMNQuc.print(lossQuc/totalQuc + " ");
-		
-		X_CLayer.print(layerSize + " ");
-		
-		layerSize -= LAYER_SIZE_DEC_NUM;
+//		System.out.println("Gmetad:");
+//		
+//		double lossQuc = 0;
+//		for(int i = 0; i < 4; i ++){
+//			lossQuc += Gmetad.lossQuc[i];
+//		}
+//		
+//		double totalQuc = 0;
+//		for(int i = 0; i < 4; i ++){
+//			totalQuc += Gmetad.totalQuc[i];
+//		}
+//		
+//		System.out.println(lossQuc);
+//		
+//		System.out.println(totalQuc);
+//		
+//		System.out.println(lossQuc/totalQuc);
+//		
+//		Y_GmetadQuc.print(lossQuc/totalQuc + " ");
+//		
+//		System.out.println("RMN:");
+//		
+//		lossQuc = 0;
+//		for(int i = 0; i < 4; i ++){
+//			lossQuc += RMN.lossQuc[i];
+//		}
+//		
+//		totalQuc = 0;
+//		for(int i = 0; i < 4; i ++){
+//			totalQuc += RMN.totalQuc[i];
+//		}
+//		
+//		System.out.println(lossQuc);
+//		
+//		System.out.println(totalQuc);
+//		
+//		System.out.println(lossQuc/totalQuc);
+//		
+//		Y_RMNQuc.print(lossQuc/totalQuc + " ");
+//		
+//		X_CLayer.print(layerSize + " ");
+//		
+//		layerSize -= LAYER_SIZE_DEC_NUM;
 		
 	}
 
