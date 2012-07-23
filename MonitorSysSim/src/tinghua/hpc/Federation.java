@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 public class Federation {
 	private static int counter;
-	private final int id = counter++;
+	private int id = counter++;
 	private int num_nodes;
 	private int num_MMNs;
-	public ArrayList<Federation> subFed;
-	public ArrayList<Integer> nodes;
-	public ArrayList<Integer> MMNs;
+	public ArrayList<Federation> subFed = new ArrayList<Federation>();
+	public ArrayList<Integer> nodes = new ArrayList<Integer>();
+	public ArrayList<Integer> MMNs = new ArrayList<Integer>();
 	private double rate;
 	private double frequency;
 	public int getNum_nodes() {
@@ -38,6 +38,9 @@ public class Federation {
 	}
 	public int getId() {
 		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 

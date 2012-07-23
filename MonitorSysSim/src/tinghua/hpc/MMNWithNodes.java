@@ -11,21 +11,41 @@ public class MMNWithNodes extends Consumption{
 	
 	public MMNWithNodes(int hosts){
 		this.hosts = hosts;
-		cacWithFormular();
 	}
 	
-	public void cacWithFormular(){
+	public void basicFormular(){
 		usage[0] = 2*hosts;
 		usage[1] = 50+0.5*hosts;
 		usage[2] = hosts;
 		usage[3] = hosts;
 	}
 	
+	public double getBCons(){
+		basicFormular();
+		return getCons();
+	}
+	
+	public void responseFormular(){
+		usage[0] = 2*hosts;
+		usage[1] = 50+0.5*hosts;
+		usage[2] = hosts;
+		usage[3] = hosts;
+	}
+	
+	public double getRCons(){
+		responseFormular();
+		return getCons();
+	}
+	
+	public double getTCons(){
+		return getBCons()+getRCons();
+	}
+	
 	public static void main(String args[]){
 		double cons = 0;
 		for(int i = 1; i <= 100; i++){
 			MMNWithNodes MMN = new MMNWithNodes(i);
-			System.out.println(i+" : "+MMN.getCons() +" : "+MMN.getIdealCons());
+			System.out.println(i+" : "+MMN.getTCons() +" : "+MMN.getIdealCons());
 		}
 	
 	}
