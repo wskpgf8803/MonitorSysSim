@@ -19,7 +19,6 @@ public class Strategy {
 			Federation fed= new Federation();
 			fed.setNum_nodes(num_nodes_array[i]);
 			fed.setNum_MMNs(num_MMN_array[i]);
-			fed.setLocaltion(fed.getId());
 			fed.setRate(rate_array[i]);
 			fedList.add(fed);
 		}
