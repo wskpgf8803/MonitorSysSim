@@ -1,16 +1,20 @@
 package tinghua.hpc;
 
+import java.util.ArrayList;
+
 public class MMNWithNodes extends Consumption{
 
 	private int hosts;
+	private ArrayList<Request> reqList;
 	
 	public MMNWithNodes(double cpu, double mem, double disk, double net) {
 		super(cpu, mem, disk, net);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public MMNWithNodes(int hosts){
+	public MMNWithNodes(int hosts, ArrayList<Request> reqList){
 		this.hosts = hosts;
+		this.reqList = reqList;
 	}
 	
 	public void basicFormular(){
@@ -44,7 +48,7 @@ public class MMNWithNodes extends Consumption{
 	public static void main(String args[]){
 		double cons = 0;
 		for(int i = 1; i <= 100; i++){
-			MMNWithNodes MMN = new MMNWithNodes(i);
+			MMNWithNodes MMN = new MMNWithNodes(i,null);
 			System.out.println(i+" : "+MMN.getTCons() +" : "+MMN.getIdealCons());
 		}
 	

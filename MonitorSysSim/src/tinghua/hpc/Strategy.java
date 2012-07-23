@@ -8,14 +8,16 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.xerces.impl.xpath.regex.REUtil;
+
 public class Strategy {
 	
 	private ArrayList<Federation> fedList;
 	private Map<Integer, Node> nodeMap;
 	private int frequency;
 	private int runningTime = 24;
-	private final double minCons = 0.1;
-	private final double maxCons = 0.5;
+	private final double minCons = 0.001;
+	private final double maxCons = 0.005;
 	private int minHosts = 15;
 	
 	public void initFedList(){
@@ -69,7 +71,7 @@ public class Strategy {
 	/**
 	 * implement the Huffman-Like Strategy
 	 */
-	public void Huffman(){
+	public void huffman(){
 		
 		TreeSet<Federation> fedTree = new TreeSet<Federation>( new Comparator<Federation>(){
 
@@ -135,45 +137,102 @@ public class Strategy {
 		return a;
 	}
 	
-	public void RankMMN(){
-		
+	public void rankMMN(){
+		Random rand = new Random();
+		for(Federation fed : fedList){
+			int num_req = (int) (fed.getRate()*frequency);
+			for(int i = 0; i < num_req; i++){
+				Request req = new Request();
+				req.setFederationId(fed.getId());
+				req.setLocation(rand.nextInt(fedList.size()));
+				int mMNId = getRankTopId(fed,req);
+				req.setMMNId(mMNId);
+				Node node = nodeMap.get(mMNId);
+				node.reqList.add(req);			
+				nodeMap.put(mMNId, node);
+				if(new MMNWithNodes(fed.getNum_nodes(), node.reqList).getTCons() > maxCons){
+					incMMN(fed);
+				}
+			}
+		}
+	}
+	
+	public int getRankTopId(Federation fed, Request req){
+		double minValue = 1;
+		int id = 0;
+		for(int i = 0; i < fed.MMNs.size(); i++){
+			Node node = nodeMap.get(fed.MMNs.get(i));
+			double value = 0.5/(new MMNWithNodes(fed.getNum_nodes(), node.reqList).getTCons()) 
+				+ 0.5/(1+Math.abs(node.getLocation() - req.getLocation()));
+			if(minValue <= value){
+				value = minValue;
+				id = node.getId();
+			}
+		}
+		return id;
+	}
+	
+	public void incMMN(Federation fed){
+		if(fed.getNum_MMNs() == fed.getNum_nodes())
+			return;
+		Random rand = new Random();
+		int id;
+		while(true){
+			id = rand.nextInt(fed.nodes.size());
+			for(int i = 0; i < fed.MMNs.size(); i++){
+				if(fed.MMNs.get(i) == id)
+					continue;
+			}
+			fed.MMNs.add(id);
+			fed.setNum_MMNs(fed.getNum_MMNs() + 1);
+		}
 	}
 	
 	public double getCons(){
 		double cons = 0;
 		RMNWithClusets rmn = new RMNWithClusets(fedList.size(), nodeMap.size());
-		cons += rmn.getCons();
+		cons += rmn.getTCons();
 		for(Federation fed:fedList){
 			for(int i = 0; i < fed.MMNs.size(); i++){
-				MMNWithNodes mmn = new MMNWithNodes(fed.nodes.size());
-				cons += mmn.getCons();
+				MMNWithNodes mmn = new MMNWithNodes(fed.nodes.size(), nodeMap.get(fed.MMNs.get(i)).reqList);
+				cons += mmn.getTCons();
 			}
 		}
 		return cons;
 	}
 	
 	public double getSatisiedRate(){
-		return 0;
+		int total = 0;
+		int satisfied = 0;
+		for(Federation fed:fedList){
+			total += fed.getNum_MMNs();
+			for(int i = 0; i < fed.MMNs.size(); i++){
+				MMNWithNodes mmn = new MMNWithNodes(fed.nodes.size(), nodeMap.get(fed.MMNs.get(i)).reqList);
+				if(mmn.getTCons() <= maxCons)
+					satisfied ++;
+			}
+		}	
+		return (double)satisfied/total;
 	}
 	
 	public void exp1(){
 		initFedList();
-		Huffman();
-		RankMMN();
+		huffman();
+		rankMMN();
 		System.out.println(getCons());
 		System.out.println(getSatisiedRate());		
 	}
 	
 	public void exp2(){
 		initFedList();
-		RankMMN();
+		rankMMN();
 		System.out.println(getCons());
 		System.out.println(getSatisiedRate());		
 	}
 	
 	public void exp3(){
 		initFedList();
-		Huffman();
+		huffman();
 		System.out.println(getCons());
 		System.out.println(getSatisiedRate());		
 	}
@@ -188,6 +247,8 @@ public class Strategy {
 		Strategy stra = new Strategy();
 		stra.exp1();
 		stra.exp2();
+		stra.exp3();
+		stra.exp4();
 
 	}
 
