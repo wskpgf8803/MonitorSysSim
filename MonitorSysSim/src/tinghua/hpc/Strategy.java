@@ -14,7 +14,7 @@ public class Strategy {
 	
 	private ArrayList<Federation> fedList;
 	private Map<Integer, Node> nodeMap;
-	private int frequency;
+	private int frequency = 50;
 	private int runningTime = 24;
 	private final double minCons = 0.001;
 	private final double maxCons = 0.005;
@@ -150,7 +150,7 @@ public class Strategy {
 				Node node = nodeMap.get(mMNId);
 				node.reqList.add(req);			
 				nodeMap.put(mMNId, node);
-				if(new MMNWithNodes(fed.getNum_nodes(), node.reqList).getTCons() > maxCons){
+				if(new MMNWithNodes(fed.getNum_nodes(), node.reqList, node.getLocation()).getTCons() > maxCons){
 					incMMN(fed);
 				}
 			}
@@ -162,8 +162,8 @@ public class Strategy {
 		int id = 0;
 		for(int i = 0; i < fed.MMNs.size(); i++){
 			Node node = nodeMap.get(fed.MMNs.get(i));
-			double value = 0.5/(new MMNWithNodes(fed.getNum_nodes(), node.reqList).getTCons()) 
-				+ 0.5/(1+Math.abs(node.getLocation() - req.getLocation()));
+			double value = 0.5/(new MMNWithNodes(fed.getNum_nodes(), node.reqList, node.getLocation()).getTCons()) 
+				+ 0.5/(MMNWithNodes.distance(node.getLocation(),req.getLocation()));
 			if(minValue <= value){
 				value = minValue;
 				id = node.getId();
@@ -178,13 +178,14 @@ public class Strategy {
 		Random rand = new Random();
 		int id;
 		while(true){
-			id = rand.nextInt(fed.nodes.size());
+			id = fed.nodes.get(rand.nextInt(fed.nodes.size()));
 			for(int i = 0; i < fed.MMNs.size(); i++){
 				if(fed.MMNs.get(i) == id)
 					continue;
 			}
 			fed.MMNs.add(id);
 			fed.setNum_MMNs(fed.getNum_MMNs() + 1);
+			break;
 		}
 	}
 	
@@ -194,7 +195,7 @@ public class Strategy {
 		cons += rmn.getTCons();
 		for(Federation fed:fedList){
 			for(int i = 0; i < fed.MMNs.size(); i++){
-				MMNWithNodes mmn = new MMNWithNodes(fed.nodes.size(), nodeMap.get(fed.MMNs.get(i)).reqList);
+				MMNWithNodes mmn = new MMNWithNodes(fed.nodes.size(), nodeMap.get(fed.MMNs.get(i)).reqList, nodeMap.get(fed.MMNs.get(i)).getLocation());
 				cons += mmn.getTCons();
 			}
 		}
@@ -207,7 +208,7 @@ public class Strategy {
 		for(Federation fed:fedList){
 			total += fed.getNum_MMNs();
 			for(int i = 0; i < fed.MMNs.size(); i++){
-				MMNWithNodes mmn = new MMNWithNodes(fed.nodes.size(), nodeMap.get(fed.MMNs.get(i)).reqList);
+				MMNWithNodes mmn = new MMNWithNodes(fed.nodes.size(), nodeMap.get(fed.MMNs.get(i)).reqList, nodeMap.get(fed.MMNs.get(i)).getLocation());
 				if(mmn.getTCons() <= maxCons)
 					satisfied ++;
 			}
@@ -249,7 +250,6 @@ public class Strategy {
 		stra.exp2();
 		stra.exp3();
 		stra.exp4();
-
 	}
 
 }
