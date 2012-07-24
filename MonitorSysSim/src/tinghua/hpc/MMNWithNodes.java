@@ -20,8 +20,8 @@ public class MMNWithNodes extends Consumption{
 	}
 	
 	public void basicFormular(){
-		usage[0] = 2*hosts;
-		usage[1] = 50+0.5*hosts;
+		usage[0] = 100+2*hosts;
+		usage[1] = 100+0.5*hosts;
 		usage[2] = hosts;
 		usage[3] = hosts;
 	}
