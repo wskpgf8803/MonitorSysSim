@@ -37,6 +37,9 @@ public class MMNWithNodes extends Consumption{
 		usage[2] = 0;
 		usage[3] = hosts * reqList.size();
 		for(int i = 0; i < reqList.size(); i++){
+			if(distance(location, reqList.get(i).getLocation())<=0){
+				System.out.println(".....");
+			}
 			usage[3] += distance(location, reqList.get(i).getLocation());
 		}
 	}

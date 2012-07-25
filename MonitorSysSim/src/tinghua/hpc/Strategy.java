@@ -1,5 +1,10 @@
 package tinghua.hpc;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -8,21 +13,26 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.math.stat.Frequency;
 import org.apache.xerces.impl.xpath.regex.REUtil;
 
 public class Strategy {
 	
 	private ArrayList<Federation> fedList;
 	private Map<Integer, Node> nodeMap;
-	private int frequency = 50;
+	private static int frequency = 50;
 	private int runningTime = 24;
 	private final double minCons = 0.001;
 	private final double maxCons = 0.005;
 	private int minHosts = 15;
 	
 	public void initFedList(){
+		Random rand =  new Random();
 		fedList = new ArrayList<Federation>();
 		nodeMap = new HashMap<Integer, Node>();
+		Federation.counter = 0;
+		Node.counter = 0;
+		Request.counter = 0;
 		int num_nodes_array[] = {4,50,70,3,12,28,56,44,19,89};
 		int num_MMN_array[] = {3,3,3,3,3,3,3,3,3,3};
 		double rate_array[] = {0.05,0.15,0.15,0.02,0.07,0.07,0.13,0.1,0.06,0.2};
@@ -36,6 +46,7 @@ public class Strategy {
 				Node node = new Node();
 				node.setFederationId(fed.getId());
 				node.setLocation(fed.getId());
+//				node.setLocation(rand.nextInt(10));
 				fed.nodes.add(node.getId());
 				nodeMap.put(node.getId(), node);
 			}
@@ -148,6 +159,29 @@ public class Strategy {
 				int mMNId = getRankTopId(fed,req);
 				req.setMMNId(mMNId);
 				Node node = nodeMap.get(mMNId);
+				if(node == null){
+					System.out.println("a");
+				}
+				node.reqList.add(req);			
+				nodeMap.put(mMNId, node);
+				if(new MMNWithNodes(fed.getNum_nodes(), node.reqList, node.getLocation()).getTCons() > maxCons){
+					incMMN(fed);
+				}
+			}
+		}
+	}
+	
+	public void noRankMMN(){
+		Random rand = new Random();
+		for(Federation fed : fedList){
+			int num_req = (int) (fed.getRate()*frequency);
+			for(int i = 0; i < num_req; i++){
+				Request req = new Request();
+				req.setFederationId(fed.getId());
+				req.setLocation(rand.nextInt(fedList.size()));
+				int mMNId = fed.MMNs.get(rand.nextInt(fed.getNum_MMNs()));
+				req.setMMNId(mMNId);
+				Node node = nodeMap.get(mMNId);
 				node.reqList.add(req);			
 				nodeMap.put(mMNId, node);
 				if(new MMNWithNodes(fed.getNum_nodes(), node.reqList, node.getLocation()).getTCons() > maxCons){
@@ -158,14 +192,15 @@ public class Strategy {
 	}
 	
 	public int getRankTopId(Federation fed, Request req){
-		double minValue = 1;
-		int id = 0;
-		for(int i = 0; i < fed.MMNs.size(); i++){
+		double minValue = 0.5/(new MMNWithNodes(fed.getNum_nodes(), nodeMap.get(fed.MMNs.get(0)).reqList, nodeMap.get(fed.MMNs.get(0)).getLocation()).getTCons()) 
+				+ 0.5/(MMNWithNodes.distance(nodeMap.get(fed.MMNs.get(0)).getLocation(),req.getLocation()));
+		int id = fed.MMNs.get(0);
+		for(int i = 1; i < fed.MMNs.size(); i++){
 			Node node = nodeMap.get(fed.MMNs.get(i));
 			double value = 0.5/(new MMNWithNodes(fed.getNum_nodes(), node.reqList, node.getLocation()).getTCons()) 
 				+ 0.5/(MMNWithNodes.distance(node.getLocation(),req.getLocation()));
-			if(minValue <= value){
-				value = minValue;
+			if(value <= minValue){
+				minValue = value;
 				id = node.getId();
 			}
 		}
@@ -216,40 +251,145 @@ public class Strategy {
 		return (double)satisfied/total;
 	}
 	
-	public void exp1(){
+	public void exp1(PrintWriter Y_Cons, PrintWriter Y_Rate){
+		System.out.println("Experiment1:");
 		initFedList();
 		huffman();
 		rankMMN();
-		System.out.println(getCons());
-		System.out.println(getSatisiedRate());		
+		double cons = getCons() * runningTime;
+		double rate = getSatisiedRate();
+		System.out.println(cons);
+		System.out.println(rate);
+		Y_Cons.print(cons + " ");
+		Y_Rate.print(rate + " ");
 	}
 	
-	public void exp2(){
+	public void exp2(PrintWriter Y_Cons, PrintWriter Y_Rate){
+		System.out.println("Experiment2:");
 		initFedList();
 		rankMMN();
-		System.out.println(getCons());
-		System.out.println(getSatisiedRate());		
+		double cons = getCons() * runningTime;
+		double rate = getSatisiedRate();
+		System.out.println(cons);
+		System.out.println(rate);
+		Y_Cons.print(cons + " ");
+		Y_Rate.print(rate + " ");
 	}
 	
-	public void exp3(){
+	public void exp3(PrintWriter Y_Cons, PrintWriter Y_Rate){
+		System.out.println("Experiment3:");
 		initFedList();
 		huffman();
-		System.out.println(getCons());
-		System.out.println(getSatisiedRate());		
+		noRankMMN();
+		double cons = getCons() * runningTime;
+		double rate = getSatisiedRate();
+		System.out.println(cons);
+		System.out.println(rate);
+		Y_Cons.print(cons + " ");
+		Y_Rate.print(rate + " ");
 	}
 	
-	public void exp4(){
+	public void exp4(PrintWriter Y_Cons, PrintWriter Y_Rate){
+		System.out.println("Experiment4:");
 		initFedList();
-		System.out.println(getCons());
-		System.out.println(getSatisiedRate());		
+		noRankMMN();
+		double cons = getCons() * runningTime;
+		double rate = getSatisiedRate();
+		System.out.println(cons);
+		System.out.println(rate);
+		Y_Cons.print(cons + " ");
+		Y_Rate.print(rate + " ");
 	}
 	
 	public static void main(String args[]){
-		Strategy stra = new Strategy();
-		stra.exp1();
-		stra.exp2();
-		stra.exp3();
-		stra.exp4();
+		
+		String filePath = "experimentData//";
+		clrAndMkDir(filePath);
+		File file = new File(filePath);
+		file.mkdir();
+		
+		PrintWriter X_Frequency = null;
+		PrintWriter Y_Cons1 = null;
+		PrintWriter Y_Cons2 = null;
+		PrintWriter Y_Cons3 = null;
+		PrintWriter Y_Cons4 = null;
+		PrintWriter Y_Rate1 = null;
+		PrintWriter Y_Rate2 = null;
+		PrintWriter Y_Rate3 = null;
+		PrintWriter Y_Rate4 = null;
+		
+		
+		try {
+			X_Frequency = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "X_Frequency.txt")));
+			Y_Cons1 = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "Y_Cons1.txt")));
+			Y_Cons2 = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "Y_Cons2.txt")));
+			Y_Cons3 = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "Y_Cons3.txt")));
+			Y_Cons4 = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "Y_Cons4.txt")));
+			Y_Rate1 = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "Y_Rate1.txt")));
+			Y_Rate2 = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "Y_Rate2.txt")));
+			Y_Rate3 = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "Y_Rate3.txt")));
+			Y_Rate4 = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "Y_Rate4.txt")));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		frequency = 0;
+		for(int i = 0; i < 1; i++){
+			X_Frequency.print(frequency + " ");
+			Strategy stra = new Strategy();
+			stra.exp1(Y_Cons1, Y_Rate1);
+			stra.exp2(Y_Cons2, Y_Rate2);
+			stra.exp3(Y_Cons3, Y_Rate3);
+			stra.exp4(Y_Cons4, Y_Rate4);
+			frequency += 10;
+		}
+		
+		X_Frequency.close();
+		Y_Cons1.close();
+		Y_Cons2.close();
+		Y_Cons3.close();
+		Y_Cons4.close();
+		Y_Rate1.close();
+		Y_Rate2.close();
+		Y_Rate3.close();
+		Y_Rate4.close();
+
 	}
+	
+	public static void clrAndMkDir(String fileName){
+		File file = new File(fileName);
+		if(file.exists()){
+			deleteDirectory(file);
+		}		
+		
+		file = new File(fileName);
+		file.mkdir();
+	}
+	
+	public static void deleteDirectory(File file){
+        try{
+            if(file.exists()&&file.isDirectory()){
+                String[] contents = file.list();
+                for(int i=0;i<contents.length;i++){
+                    File file2X = new File(file.getAbsolutePath() + "/" +contents[i]);
+                    if(file2X.exists()){
+                        if(file2X.isFile()){
+                            file2X.delete();
+                        }else if(file2X.isDirectory()){
+                            deleteDirectory(file2X);
+                        }
+                    }else{
+                        throw new RuntimeException("File not exist!");
+                    }
+                }
+                file.delete();
+            }else{
+                throw new RuntimeException("Not a directory!");
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 
 }

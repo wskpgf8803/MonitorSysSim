@@ -3,7 +3,7 @@ package tinghua.hpc;
 import java.util.ArrayList;
 
 public class Node {
-	private static int counter;
+	public static int counter;
 	private final int id = counter++;
 	private int location;
 	private int federationId;

@@ -1,7 +1,7 @@
 package tinghua.hpc;
 
 public class Request {
-	private static int counter;
+	public static int counter;
 	private final int id = counter++;
 	private int location;
 	private int federationId;
