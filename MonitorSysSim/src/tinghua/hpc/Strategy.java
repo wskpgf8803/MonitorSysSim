@@ -136,7 +136,7 @@ public class Strategy {
 	public Federation combineFeder(Federation a, Federation b){
 		a.setId(a.getId());
 		a.setNum_nodes(a.getNum_nodes() + b.getNum_nodes());
-		a.setNum_MMNs(a.getNum_MMNs() + b.getNum_MMNs());
+		a.setNum_MMNs(a.getNum_MMNs());
 		a.setRate(a.getRate() + b.getRate());
 		for(Federation federation : b.subFed){
 			a.subFed.add(federation);
@@ -334,15 +334,15 @@ public class Strategy {
 			e.printStackTrace();
 		}
 		
-		frequency = 0;
-		for(int i = 0; i < 1; i++){
+		frequency = 50;
+		for(int i = 0; i < 10; i++){
 			X_Frequency.print(frequency + " ");
 			Strategy stra = new Strategy();
 			stra.exp1(Y_Cons1, Y_Rate1);
 			stra.exp2(Y_Cons2, Y_Rate2);
 			stra.exp3(Y_Cons3, Y_Rate3);
 			stra.exp4(Y_Cons4, Y_Rate4);
-			frequency += 10;
+			frequency += 50;
 		}
 		
 		X_Frequency.close();
