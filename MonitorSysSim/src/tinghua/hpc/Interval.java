@@ -1,5 +1,12 @@
 package tinghua.hpc;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Random;
+
 import jsc.distributions.Normal;
 import desmoj.core.dist.ContDistNormal;
 
@@ -11,10 +18,10 @@ public class Interval {
 //	private final double DISK = 300000;
 //	private final double NETWORK = 1000;
 	
-	Normal normalCPU = new Normal(0, 100);
-	Normal normalMEMORY = new Normal(0, 200);
+	Normal normalCPU = new Normal(0, 200);
+	Normal normalMEMORY = new Normal(0, 400);
 	Normal normalDISK = new Normal(0, 30000);
-	Normal normalNETWORK = new Normal(0, 250);
+	Normal normalNETWORK = new Normal(0, 350);
 	
 	protected double getNextValue(double value, int type) {
 
@@ -26,29 +33,86 @@ public class Interval {
 		case 1:
 			normal = normalMEMORY;
 			break;
+		case 3:
+			normal = normalNETWORK;
+			break;
 		case 2:
 			normal = normalDISK;
+			return value + 100;
+		}
+		
+		double valueTemp;
+		Random rank = new Random();
+		do{
+			double rate = rank.nextDouble();
+			if(rate < 0.1){//10%的概率value值会变
+				double temp = normal.random();
+				while(temp < 0){
+					temp = normal.random();
+				}
+				valueTemp = temp + value;
+			}else{//10%的概率value值会变
+				valueTemp = value;
+			}
+
+		}while(valueTemp <= 0 || valueTemp >= maxValue[type]);
+		return valueTemp;
+	}
+	
+	protected double getNextValue(double value, int type, int interval) {
+
+		Normal normal = null;
+		switch(type){
+		case 0:
+			normal = normalCPU;
+			break;
+		case 1:
+			normal = normalMEMORY;
 			break;
 		case 3:
 			normal = normalNETWORK;
 			break;
+		case 2:
+			normal = normalDISK;
+			return value + 10*interval;
 		}
 		
 		double valueTemp;
-		do{
-			valueTemp = normal.random() + value;
-		}while(valueTemp <= 0 || valueTemp >= maxValue[type]);
+		Random rank = new Random();
+		{
+			double rate = rank.nextDouble();
+			if(rate < 0.05 * interval){//10%的概率value值会变
+
+//				double temp = maxValue[type]/1000*interval;
+//				valueTemp = temp + value;
+				double temp = normal.random();
+
+				valueTemp = temp + value;
+			}else{//10%的概率value值不会变
+				valueTemp = value;
+			}
+
+		}
+		if(valueTemp >= maxValue[type]){
+			return maxValue[type];
+		}
+		if(valueTemp < 0){
+			valueTemp = 0;
+		}
 		return valueTemp;
 	}
 	
 	public double getAccurate(int interval){
 		
-		double value0[] = {800,1000,100000,500};
-		double value1[] = {800,1000,100000,500};
+//		double value0[] = {800,1000,100000,500};
+//		double value1[] = {800,1000,100000,500};
+		double value0[] = {0,0,0,0};
+		double value1[] = {0,0,0,0};
 		
-		for(int i = 0; i < interval; i++){
+//		for(int i = 0; i < interval; i++)
+		{
 			for(int j = 0; j < 4; j++){
-				value1[j] = getNextValue(value1[j], j);
+				value1[j] = getNextValue(value0[j], j, interval);
 			}
 		}
 		
@@ -60,17 +124,73 @@ public class Interval {
 	}
 	
 	public static void main(String args[]){
+		
+		String filePath = "experimentData//";
+		clrAndMkDir(filePath);
+		File file = new File(filePath);
+		file.mkdir();
+		
+		PrintWriter X_Interval = null;
+		PrintWriter Y_Accuracy = null;	
+		
+		try {
+			X_Interval = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "X_Interval.txt")));
+			Y_Accuracy = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "Y_Accuracy.txt")));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		Interval interval = new Interval();
 		double accurate[]= new double[100];
 		for(int l = 0; l < 100; l++){
 			for(int i = 1; i <= 100; i++){
-				accurate[l] += interval.getAccurate(i);
+				accurate[i-1] += interval.getAccurate(i);
 			}
 		}
 		for(int i = 0; i < 100; i++){
+			X_Interval.print(i + " ");
+			Y_Accuracy.print(accurate[i]/100 + " ");
 			System.out.println(i+" : " + accurate[i]/100);
 		}
-
+		
+		X_Interval.close();
+		Y_Accuracy.close();
 	}
+	
+	public static void clrAndMkDir(String fileName){
+		File file = new File(fileName);
+		if(file.exists()){
+			deleteDirectory(file);
+		}		
+		
+		file = new File(fileName);
+		file.mkdir();
+	}
+	
+	public static void deleteDirectory(File file){
+        try{
+            if(file.exists()&&file.isDirectory()){
+                String[] contents = file.list();
+                for(int i=0;i<contents.length;i++){
+                    File file2X = new File(file.getAbsolutePath() + "/" +contents[i]);
+                    if(file2X.exists()){
+                        if(file2X.isFile()){
+                            file2X.delete();
+                        }else if(file2X.isDirectory()){
+                            deleteDirectory(file2X);
+                        }
+                    }else{
+                        throw new RuntimeException("File not exist!");
+                    }
+                }
+                file.delete();
+            }else{
+                throw new RuntimeException("Not a directory!");
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 
 }

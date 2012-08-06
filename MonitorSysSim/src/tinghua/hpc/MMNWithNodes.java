@@ -1,5 +1,10 @@
 package tinghua.hpc;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class MMNWithNodes extends Consumption{
@@ -20,10 +25,10 @@ public class MMNWithNodes extends Consumption{
 	}
 	
 	public void basicFormular(){
-		usage[0] = 100+2*hosts;
+		usage[0] = 100+2*hosts + 0.1*hosts*hosts;
 		usage[1] = 100+0.5*hosts;
 		usage[2] = hosts;
-		usage[3] = hosts;
+		usage[3] = hosts*0.1;
 	}
 	
 	public double getBCons(){
@@ -65,12 +70,69 @@ public class MMNWithNodes extends Consumption{
 	}
 	
 	public static void main(String args[]){
+		
+		String filePath = "experimentData//";
+		clrAndMkDir(filePath);
+		File file = new File(filePath);
+		file.mkdir();
+		
+		PrintWriter X_Host = null;
+		PrintWriter Y_ConsFMN = null;	
+		
+		try {
+			X_Host = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "X_Host.txt")));
+			Y_ConsFMN = new PrintWriter(new BufferedWriter(new FileWriter(filePath + "Y_ConsFMN.txt")));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		double cons = 0;
 		for(int i = 1; i <= 100; i++){
 			MMNWithNodes MMN = new MMNWithNodes(i,null,0);
-			System.out.println(i+" : "+MMN.getTCons() +" : "+MMN.getIdealCons());
+			cons = MMN.getBCons();
+			X_Host.print(i + " ");
+			Y_ConsFMN.print(cons + " ");
+			System.out.println(i+" : "+cons +" : "+MMN.getIdealCons());
 		}
+		X_Host.close();
+		Y_ConsFMN.close();
 	
 	}
+	
+	public static void clrAndMkDir(String fileName){
+		File file = new File(fileName);
+		if(file.exists()){
+			deleteDirectory(file);
+		}		
+		
+		file = new File(fileName);
+		file.mkdir();
+	}
+	
+	public static void deleteDirectory(File file){
+        try{
+            if(file.exists()&&file.isDirectory()){
+                String[] contents = file.list();
+                for(int i=0;i<contents.length;i++){
+                    File file2X = new File(file.getAbsolutePath() + "/" +contents[i]);
+                    if(file2X.exists()){
+                        if(file2X.isFile()){
+                            file2X.delete();
+                        }else if(file2X.isDirectory()){
+                            deleteDirectory(file2X);
+                        }
+                    }else{
+                        throw new RuntimeException("File not exist!");
+                    }
+                }
+                file.delete();
+            }else{
+                throw new RuntimeException("Not a directory!");
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 	
 }

@@ -23,7 +23,7 @@ public class Strategy {
 	private static int frequency = 50;
 	private int runningTime = 24;
 	private final double minCons = 0.001;
-	private final double maxCons = 0.005;
+	private final double maxCons = 0.025;
 	private int minHosts = 15;
 	
 	public void initFedList(){
@@ -33,9 +33,9 @@ public class Strategy {
 		Federation.counter = 0;
 		Node.counter = 0;
 		Request.counter = 0;
-		int num_nodes_array[] = {4,50,70,3,12,28,56,44,19,89};
+		int num_nodes_array[] = {4,50,60,3,12,28,56,44,19,70};
 		int num_MMN_array[] = {3,3,3,3,3,3,3,3,3,3};
-		double rate_array[] = {0.05,0.15,0.15,0.02,0.07,0.07,0.13,0.1,0.06,0.2};
+		double rate_array[] = {0.01,0.15,0.24,0.01,0.03,0.07,0.13,0.1,0.06,0.2};
 		for(int i = 0; i < 10; i++){
 			Federation fed= new Federation();
 			fed.setNum_nodes(num_nodes_array[i]);
@@ -184,9 +184,9 @@ public class Strategy {
 				Node node = nodeMap.get(mMNId);
 				node.reqList.add(req);			
 				nodeMap.put(mMNId, node);
-				if(new MMNWithNodes(fed.getNum_nodes(), node.reqList, node.getLocation()).getTCons() > maxCons){
-					incMMN(fed);
-				}
+//				if(new MMNWithNodes(fed.getNum_nodes(), node.reqList, node.getLocation()).getTCons() > maxCons){
+//					incMMN(fed);
+//				}
 			}
 		}
 	}
@@ -199,7 +199,7 @@ public class Strategy {
 			Node node = nodeMap.get(fed.MMNs.get(i));
 			double value = 0.5/(new MMNWithNodes(fed.getNum_nodes(), node.reqList, node.getLocation()).getTCons()) 
 				+ 0.5/(MMNWithNodes.distance(node.getLocation(),req.getLocation()));
-			if(value <= minValue){
+			if(value > minValue){
 				minValue = value;
 				id = node.getId();
 			}
@@ -334,15 +334,16 @@ public class Strategy {
 			e.printStackTrace();
 		}
 		
-		frequency = 50;
+		int feq = 50;
 		for(int i = 0; i < 10; i++){
-			X_Frequency.print(frequency + " ");
+			frequency = (int)(feq * 0.3);
+			X_Frequency.print(feq + " ");
 			Strategy stra = new Strategy();
 			stra.exp1(Y_Cons1, Y_Rate1);
 			stra.exp2(Y_Cons2, Y_Rate2);
 			stra.exp3(Y_Cons3, Y_Rate3);
 			stra.exp4(Y_Cons4, Y_Rate4);
-			frequency += 50;
+			feq += 50;
 		}
 		
 		X_Frequency.close();
