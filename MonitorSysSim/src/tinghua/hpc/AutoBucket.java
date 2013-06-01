@@ -346,7 +346,7 @@ public class AutoBucket {
         System.out.println("time = " + estimatedTime + " ns");
         System.out.println("memory = " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory() - totalmem )+ " B");
 
-        System.out.println("over!");
+        System.out.println("game over!");
  
     }
 }
