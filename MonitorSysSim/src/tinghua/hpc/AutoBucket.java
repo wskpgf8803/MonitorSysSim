@@ -14,7 +14,7 @@ import java.util.List;
 
 public class AutoBucket {
     public final static int bucketCapacity =1000;
-    public final static int NUMBER = 1000000;
+    public final static int NUMBER = 10000000;
 
     //
     public static int getRank(List<List<UserScore>> bucketList, int score) {
