@@ -37,14 +37,22 @@ public class MMNWithNodes extends Consumption{
 	}
 	
 	public void responseFormular(){
-		usage[0] = 0.1*hosts*reqList.size();
-		usage[1] = 0.1*hosts;
+//		usage[0] = 0.1*hosts*reqList.size();
+//		usage[1] = 0.1*hosts;
+//		usage[2] = 0;
+//		usage[3] = hosts * reqList.size();
+//		for(int i = 0; i < reqList.size(); i++){
+//			if(distance(location, reqList.get(i).getLocation())<=0){
+//				System.out.println(".....");
+//			}
+//			usage[3] += distance(location, reqList.get(i).getLocation());
+//		}
+		int size = reqList.size();
+		usage[0] = 0.5*size*Math.log(size+1);
+		usage[1] = 0.2*(size*size) + 2*size;
 		usage[2] = 0;
-		usage[3] = hosts * reqList.size();
+		usage[3] = 0;
 		for(int i = 0; i < reqList.size(); i++){
-			if(distance(location, reqList.get(i).getLocation())<=0){
-				System.out.println(".....");
-			}
 			usage[3] += distance(location, reqList.get(i).getLocation());
 		}
 	}
@@ -59,6 +67,7 @@ public class MMNWithNodes extends Consumption{
 	
 	public double getTCons(){
 		return getBCons()+getRCons();
+//		return getRCons();
 	}
 	
 	public static int distance(int loc1, int loc2){

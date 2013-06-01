@@ -23,7 +23,7 @@ public class Strategy {
 	private static int frequency = 50;
 	private int runningTime = 24;
 	private final double minCons = 0.001;
-	private final double maxCons = 0.025;
+	private final double maxCons = 0.010;
 	private int minHosts = 15;
 	
 	public void initFedList(){
@@ -258,6 +258,15 @@ public class Strategy {
 		rankMMN();
 		double cons = getCons() * runningTime;
 		double rate = getSatisiedRate();
+		
+		sumcons[0] += cons;
+		sumrate[0] += rate;
+		loop++;
+		if(loop != num)
+			return;
+		cons = sumcons[0]/loop;
+		rate = sumrate[0]/loop;
+		
 		System.out.println(cons);
 		System.out.println(rate);
 		Y_Cons.print(cons + " ");
@@ -270,6 +279,15 @@ public class Strategy {
 		rankMMN();
 		double cons = getCons() * runningTime;
 		double rate = getSatisiedRate();
+		
+		sumcons[1] += cons;
+		sumrate[1] += rate;
+		loop++;
+		if(loop != num)
+			return;
+		cons = sumcons[1]/loop;
+		rate = sumrate[1]/loop;
+		
 		System.out.println(cons);
 		System.out.println(rate);
 		Y_Cons.print(cons + " ");
@@ -283,6 +301,15 @@ public class Strategy {
 		noRankMMN();
 		double cons = getCons() * runningTime;
 		double rate = getSatisiedRate();
+		
+		sumcons[2] += cons;
+		sumrate[2] += rate;
+		loop++;
+		if(loop != num)
+			return;
+		cons = sumcons[2]/loop;
+		rate = sumrate[2]/loop;
+		
 		System.out.println(cons);
 		System.out.println(rate);
 		Y_Cons.print(cons + " ");
@@ -295,12 +322,25 @@ public class Strategy {
 		noRankMMN();
 		double cons = getCons() * runningTime;
 		double rate = getSatisiedRate();
+		
+		sumcons[3] += cons;
+		sumrate[3] += rate;
+		loop++;
+		if(loop != num)
+			return;
+		cons = sumcons[3]/loop;
+		rate = sumrate[3]/loop;
+		
 		System.out.println(cons);
 		System.out.println(rate);
 		Y_Cons.print(cons + " ");
 		Y_Rate.print(rate + " ");
 	}
 	
+	public static double sumcons[] = new double[4];
+	public static double sumrate[] = new double[4];
+	public static int loop = 0;
+	public static final int num = 1;
 	public static void main(String args[]){
 		
 		String filePath = "experimentData//";
@@ -333,17 +373,46 @@ public class Strategy {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		int feq = 50;
-		for(int i = 0; i < 10; i++){
-			frequency = (int)(feq * 0.3);
+
+		int l = num;
+		int feq = 0;
+		Strategy stra = new Strategy();
+		for (int i = 0; i < 10; i++) {
+			frequency = (int) (feq);
 			X_Frequency.print(feq + " ");
-			Strategy stra = new Strategy();
-			stra.exp1(Y_Cons1, Y_Rate1);
-			stra.exp2(Y_Cons2, Y_Rate2);
-			stra.exp3(Y_Cons3, Y_Rate3);
-			stra.exp4(Y_Cons4, Y_Rate4);
-			feq += 50;
+			for(int j = 0; j < 4; j++){
+				sumcons[j] = 0;
+				sumrate[j] = 0;
+			}
+			loop = 0;
+			for (int j = 0; j < l; ++j) {
+				stra.exp1(Y_Cons1, Y_Rate1);
+			}
+			for(int j = 0; j < 4; j++){
+				sumcons[j] = 0;
+				sumrate[j] = 0;
+			}
+			loop = 0;
+			for (int j = 0; j < l; ++j) {
+				stra.exp2(Y_Cons2, Y_Rate2);
+			}
+			for(int j = 0; j < 4; j++){
+				sumcons[j] = 0;
+				sumrate[j] = 0;
+			}
+			loop = 0;
+			for (int j = 0; j < l; ++j) {
+				stra.exp3(Y_Cons3, Y_Rate3);
+			}
+			for(int j = 0; j < 4; j++){
+				sumcons[j] = 0;
+				sumrate[j] = 0;
+			}
+			loop = 0;
+			for (int j = 0; j < l; ++j) {
+				stra.exp4(Y_Cons4, Y_Rate4);
+			}
+			feq += 15;
 		}
 		
 		X_Frequency.close();

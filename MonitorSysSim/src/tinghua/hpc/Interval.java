@@ -38,7 +38,7 @@ public class Interval {
 			break;
 		case 2:
 			normal = normalDISK;
-			return value + 100;
+//			return value + 100;
 		}
 		
 		double valueTemp;
@@ -123,6 +123,27 @@ public class Interval {
 		return 1-acc/4;
 	}
 	
+	public double getTraceAcc(int t, int interval){
+		if(interval == 0)
+			return 0;
+		int metric = 4;
+		double exp = 1;
+		double paraA[] = {2*Math.PI/(360), 2*Math.PI/(360), 2*Math.PI/(3600),2*Math.PI/(3000)};
+		double paraB[] = {1/Math.sqrt(2), 1/Math.sqrt(1), 1/Math.sqrt(3), 1/Math.sqrt(2)};
+
+		Random random = new Random();
+		double sum = 0;
+		for(int i = 0; i < metric; i++){
+			int time = random.nextInt(interval);
+			double real = Math.pow(0.5 + 0.5*Math.cos(paraA[i]*t)*paraB[i], exp);
+			double fake = Math.pow(0.5 + 0.5*Math.cos(paraA[i]*(t-time))*paraB[i], exp);
+			double temp = Math.abs(real - fake);
+			sum += temp;
+		}
+		
+		return 1- sum/metric;		
+	}
+	
 	public static void main(String args[]){
 		
 		String filePath = "experimentData//";
@@ -142,20 +163,43 @@ public class Interval {
 		}
 		
 		Interval interval = new Interval();
-		double accurate[]= new double[100];
-		for(int l = 0; l < 100; l++){
-			for(int i = 1; i <= 100; i++){
-				accurate[i-1] += interval.getAccurate(i);
+		
+		int loop = 10;
+		int timeLen = 3600;
+		int intervalLen = 100;
+		double accurate[]= new double[intervalLen+1];
+//		for(int l = 0; l < 100; l++){
+//			for(int i = 1; i <= 100; i++){
+//				accurate[i-1] += interval.getAccurate(i);
+//			}
+//		}
+		
+		for(int i = 0; i < loop; i++){
+			for(int j = 0; j <= intervalLen; j+=5){
+				double sum = 0;
+//				for(int k = j; k < timeLen + j; k++){
+//					sum += interval.getTraceAcc(k, j);
+//				}
+				int sumLoop = timeLen/360;
+				for(int k = 1; k <= sumLoop; k++){
+					sum += interval.getTraceAcc(k*(timeLen/sumLoop), j);
+				}
+				accurate[j] += sum/(sumLoop);
 			}
 		}
-		for(int i = 0; i < 100; i++){
+		accurate[0] = 1;
+		for(int i = 1; i <= intervalLen; i++){
+			accurate[i]/=loop;
+		}
+		for(int i = 0; i <= intervalLen; i+=5){
 			X_Interval.print(i + " ");
-			Y_Accuracy.print(accurate[i]/100 + " ");
-			System.out.println(i+" : " + accurate[i]/100);
+			Y_Accuracy.print(accurate[i] + " ");
+			System.out.println(i+" : " + accurate[i]);
 		}
 		
 		X_Interval.close();
 		Y_Accuracy.close();
+		System.out.println("over!");
 	}
 	
 	public static void clrAndMkDir(String fileName){
